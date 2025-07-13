@@ -1,243 +1,1110 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BMI Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BMI Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet"/>
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-  <style>
-    body {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      min-height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    .main-container {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-    .unit-toggle .btn.active {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-color: #667eea;
-    }
-    .calculate-btn {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      transition: transform .3s, box-shadow .3s;
-    }
-    .calculate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
-    }
-    .result {
-      display: none;
-      background: linear-gradient(135deg,#f8f9fa,#e9ecef);
-      border-radius: 15px;
-      border-left: 5px solid #667eea;
-      animation: slideIn .5s ease;
-    }
-    .result.show { display: block; }
-    @keyframes slideIn {
-      from { opacity:0; transform: translateY(20px); }
-      to { opacity:1; transform: translateY(0); }
-    }
-    .bmi-value { font-size:3rem; font-weight:700; color:#667eea; }
-    .bmi-category { font-size:1.5rem; font-weight:600; }
-    .category-underweight { color:#dc3545; }
-    .category-normal { color:#198754; }
-    .category-overweight { color:#ffc107; }
-    .category-obese { color:#dc3545; }
-    .health-advice { display:none; border-radius:15px; border-left:4px solid #667eea; animation:slideIn .5s ease; }
-    .health-advice.show { display:block; }
-    .advice-underweight { border-left-color:#dc3545; background:#ffeaea; }
-    .advice-normal      { border-left-color:#198754; background:#e6ffe6; }
-    .advice-overweight  { border-left-color:#ffc107; background:#fff5cc; }
-    .advice-obese       { border-left-color:#dc3545; background:#ffd6d6; }
-    .section-title { font-weight:bold; margin-top:.75rem; }
-    @media (max-width:576px){
-      .bmi-value { font-size:2rem; }
-      .bmi-category { font-size:1.2rem; }
-    }
-  </style>
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
+        .floating-icon:nth-child(3) { top: 60%; left: 5%; animation-delay: 2s; }
+        .floating-icon:nth-child(4) { top: 70%; right: 10%; animation-delay: 3s; }
+        .floating-icon:nth-child(5) { top: 40%; left: 20%; animation-delay: 4s; }
+        .floating-icon:nth-child(6) { top: 80%; left: 30%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+            margin: 0.5rem;
+        }
+
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        }
+
+        .unit-toggle .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .unit-toggle .btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            font-size: 1.1rem;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bmi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .bmi-category {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .category-underweight { color: #dc3545; }
+        .category-normal { color: #198754; }
+        .category-overweight { color: #ffc107; }
+        .category-obese { color: #dc3545; }
+
+        .health-advice {
+            display: none;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .health-advice.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        #show-me-btn {
+            transition: all 0.3s ease;
+            min-height: 50px;
+            font-size: 1rem;
+        }
+        
+        #show-me-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+        }
+
+        #show-me-btn:active {
+            transform: translateY(0);
+        }
+
+        .advice-underweight {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+        }
+
+        .advice-normal {
+            border-left-color: #198754;
+            background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+        }
+
+        .advice-overweight {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fffbf0, #fff2e6);
+        }
+
+        .advice-obese {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+        }
+
+        .health-advice .section-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border: none;
+            border-radius: 15px;
+        }
+
+        .form-control {
+            min-height: 50px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .food-icon {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .water-icon {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .pulse-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .mobile-optimized {
+            padding: 1rem;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .close-btn {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0.25rem;
+                padding: 1rem !important;
+                border-radius: 15px;
+            }
+            
+            .bmi-value {
+                font-size: 2.5rem;
+            }
+            
+            .bmi-category {
+                font-size: 1.2rem;
+            }
+            
+            .floating-icon {
+                font-size: 1.5rem;
+            }
+            
+            .unit-toggle {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .unit-toggle .btn {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+                width: 100%;
+            }
+            
+            .form-control {
+                font-size: 1rem;
+                padding: 0.75rem;
+                min-height: 48px;
+            }
+            
+            .calculate-btn {
+                font-size: 1rem;
+                padding: 0.75rem;
+                min-height: 48px;
+            }
+            
+            #show-me-btn {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+                min-height: 48px;
+            }
+            
+            .form-label {
+                font-size: 0.95rem;
+            }
+            
+            .alert {
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+            
+            .health-advice .card-body {
+                padding: 1rem;
+            }
+            
+            .health-advice .section-title {
+                font-size: 0.95rem;
+            }
+            
+            .info-card .card-body {
+                padding: 1rem;
+            }
+            
+            .info-card ul li {
+                font-size: 0.85rem;
+                margin-bottom: 0.25rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-container {
+                margin: 0.125rem;
+                padding: 0.75rem !important;
+            }
+            
+            .col-md-4 {
+                margin-bottom: 1rem;
+            }
+            
+            .unit-toggle .btn {
+                margin-bottom: 0.25rem;
+            }
+            
+            .bmi-value {
+                font-size: 2.2rem;
+            }
+            
+            .bmi-category {
+                font-size: 1.1rem;
+            }
+            
+            .form-control {
+                min-height: 44px;
+                padding: 0.625rem;
+            }
+            
+            .calculate-btn {
+                min-height: 44px;
+                padding: 0.625rem;
+            }
+            
+            #show-me-btn {
+                min-height: 44px;
+                padding: 0.625rem;
+            }
+            
+            .close-btn {
+                min-width: 40px;
+                min-height: 40px;
+            }
+            
+            .stats-card {
+                padding: 0.375rem;
+                font-size: 0.8rem;
+            }
+            
+            .floating-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .bmi-value {
+                font-size: 2rem;
+            }
+            
+            .bmi-category {
+                font-size: 1rem;
+            }
+            
+            .form-control {
+                font-size: 0.9rem;
+            }
+            
+            .calculate-btn {
+                font-size: 0.9rem;
+            }
+            
+            #show-me-btn {
+                font-size: 0.85rem;
+            }
+            
+            .health-advice .card-body {
+                padding: 0.75rem;
+            }
+            
+            .info-card .card-body {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .calculate-btn:hover {
+                transform: none;
+            }
+            
+            #show-me-btn:hover {
+                transform: none;
+            }
+            
+            .form-control:focus {
+                transform: none;
+            }
+            
+            .unit-toggle .btn:hover {
+                transform: none;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-container {
+                margin: 0.5rem;
+                padding: 1rem !important;
+            }
+            
+            .floating-icon {
+                font-size: 1rem;
+            }
+            
+            .unit-toggle {
+                flex-direction: row;
+                gap: 0.25rem;
+            }
+            
+            .unit-toggle .btn {
+                width: auto;
+                flex: 1;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4">
-    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-      <div class="main-container p-4 p-md-5 position-relative">
-        <h1 class="fw-bold text-dark mb-2 text-center">
-          <i class="bi bi-calculator text-primary me-2"></i>BMI Calculator
-        </h1>
-        <p class="text-muted text-center mb-4" id="bmi-count">👤 0 people have checked their BMI</p>
-
-        <div class="unit-toggle btn-group w-100 mb-4" role="group">
-          <button type="button" class="btn btn-outline-primary active" onclick="setUnit('metric')">
-            <i class="bi bi-rulers me-2"></i>Metric (kg/cm)
-          </button>
-          <button type="button" class="btn btn-outline-primary" onclick="setUnit('mixed')">
-            <i class="bi bi-arrow-left-right me-2"></i>Mixed (kg/in)
-          </button>
-        </div>
-
-        <form id="bmi-form">
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              <label for="age" class="form-label fw-semibold"><i class="bi bi-person me-2"></i>Age</label>
-              <input id="age" type="number" class="form-control form-control-lg" placeholder="Age" min="2" max="120" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold"><i class="bi bi-gender-ambiguous me-2"></i>Gender</label>
-              <div class="form-check">
-                <input id="genderMale" class="form-check-input" type="radio" name="gender" value="male" checked>
-                <label class="form-check-label" for="genderMale">Male</label>
-              </div>
-              <div class="form-check">
-                <input id="genderFemale" class="form-check-input" type="radio" name="gender" value="female">
-                <label class="form-check-label" for="genderFemale">Female</label>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="weight" class="form-label fw-semibold"><i class="bi bi-weight me-2"></i>Weight</label>
-              <input id="weight" type="number" class="form-control form-control-lg" placeholder="Weight" step="0.1" min="0" required>
-            </div>
-            <div class="col-md-6">
-              <label for="height" class="form-label fw-semibold"><i class="bi bi-arrows-vertical me-2"></i>Height</label>
-              <input id="height" type="number" class="form-control form-control-lg" placeholder="Height" step="0.1" min="0" required>
-            </div>
-          </div>
-          <button type="button" class="btn btn-primary btn-lg w-100 calculate-btn" onclick="calculateBMI()">
-            <i class="bi bi-calculator me-2"></i>Calculate BMI
-          </button>
-        </form>
-
-        <div class="result card mt-4" id="result">
-          <div class="card-body text-center">
-            <div class="bmi-value" id="bmi-value">0</div>
-            <div class="bmi-category" id="bmi-category">Normal</div>
-            <div class="text-muted mb-3" id="bmi-range">BMI Range: 18.5 - 24.9</div>
-            <button type="button" class="btn btn-success btn-lg" id="show-me-btn" style="display:none;" onclick="showHealthAdvice()">
-              <i class="bi bi-heart-pulse me-2"></i>Show Health Advice
-            </button>
-          </div>
-        </div>
-
-        <div class="health-advice card mt-3" id="health-advice">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Health Tips</h5>
-              <button class="btn btn-outline-secondary btn-sm" onclick="hideHealthAdvice()">
-                <i class="bi bi-x-lg"></i>
-              </button>
-            </div>
-            <ul class="list-unstyled" id="advice-list"></ul>
-          </div>
-        </div>
-      </div>
+    <div class="floating-icons">
+        <div class="floating-icon">🥗</div>
+        <div class="floating-icon">💧</div>
+        <div class="floating-icon">🍎</div>
+        <div class="floating-icon">🥛</div>
+        <div class="floating-icon">🥜</div>
+        <div class="floating-icon">🥚</div>
     </div>
-  </div>
 
-  <script>
-    let currentUnit = 'metric';
-    let bmiCheckCount = localStorage.getItem('bmiCheckCount') ? parseInt(localStorage.getItem('bmiCheckCount')) : 0;
-    document.getElementById('bmi-count').textContent = `👤 ${bmiCheckCount} people have checked their BMI`;
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-2">
+        <div class="row justify-content-center w-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="main-container p-3 p-md-4 mobile-optimized">
+                    <div class="text-center mb-3">
+                        <h1 class="fw-bold text-dark mb-3" style="font-size: 1.8rem;">
+                            <i class="bi bi-calculator text-primary me-2 pulse-icon"></i>BMI Calculator
+                        </h1>
+                        <div class="row justify-content-center g-2">
+                            <div class="col-auto">
+                                <div class="stats-card">
+                                    <small class="text-muted">
+                                        <i class="bi bi-people me-1"></i>
+                                        <span id="bmi-count">0</span> people have checked their BMI
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="stats-card">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        Last checked: <span id="last-checked">Never</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="unit-toggle btn-group w-100 mb-3" role="group">
+                        <button type="button" class="btn btn-outline-primary active" onclick="setUnit('metric')">
+                            <i class="bi bi-rulers me-2"></i>Metric (kg/cm)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="setUnit('mixed')">
+                            <i class="bi bi-arrow-left-right me-2"></i>Mixed (kg/in)
+                        </button>
+                    </div>
+                    
+                    <div class="card info-card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="bi bi-info-circle text-primary me-2"></i>Quick Guide
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><strong>Metric:</strong> Weight in kg, Height in cm (e.g., 70 kg, 175 cm)</li>
+                                <li><strong>Mixed:</strong> Weight in kg, Height in inches (e.g., 70 kg, 69 in)</li>
+                                <li><strong>Height conversion:</strong> 5'6" = 66 inches = 167.6 cm</li>
+                                <li><strong>Age Note:</strong> Adults (20+) use standard BMI categories</li>
+                                <li><strong>Children/Teens:</strong> BMI interpretation requires percentile charts</li>
+                                <li><strong>BMI Limitations:</strong> Doesn't account for muscle mass, bone density, or body fat distribution</li>
+                            </ul>
+                        </div>
+                    </div>
 
-    function setUnit(unit) {
-      currentUnit = unit;
-      const btns = document.querySelectorAll('.unit-toggle .btn');
-      btns.forEach(b => b.classList.remove('active'));
-      btns[unit === 'metric' ? 0 : 1].classList.add('active');
-      document.getElementById('weight').placeholder = 'Weight (kg)';
-      document.getElementById('height').placeholder = unit === 'metric' ? 'Height (cm)' : 'Height (in)';
-    }
+                    <form id="bmi-form">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <label for="age" class="form-label">
+                                    <i class="bi bi-person me-2"></i>Age
+                                </label>
+                                <input type="text" class="form-control" id="age" 
+                                       placeholder="Enter age (2+ years)" inputmode="numeric" 
+                                       pattern="[0-9]*" oninput="validateAgeInput(this)">
+                                <div class="alert alert-danger mt-2" id="age-error" style="display: none;">
+                                    Please enter a valid age (2+ years, numbers only)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">
+                                    <i class="bi bi-gender-ambiguous me-2"></i>Gender
+                                </label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gender" id="male" value="male">
+                                        <label class="form-check-label" for="male">Male</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                                        <label class="form-check-label" for="female">Female</label>
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger mt-2" id="gender-error" style="display: none;">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Please select your gender
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="weight" class="form-label">
+                                    <i class="bi bi-weight me-2"></i>Weight
+                                </label>
+                                <input type="text" class="form-control" id="weight" 
+                                       placeholder="Enter weight" inputmode="decimal" 
+                                       oninput="validateNumberInput(this)">
+                                <div class="alert alert-danger mt-2" id="weight-error" style="display: none;">
+                                    Please enter a valid weight (positive numbers only)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="height" class="form-label">
+                                    <i class="bi bi-arrows-vertical me-2"></i>Height
+                                </label>
+                                <input type="text" class="form-control" id="height" 
+                                       placeholder="Enter height" inputmode="decimal" 
+                                       oninput="validateNumberInput(this)">
+                                <div class="alert alert-danger mt-2" id="height-error" style="display: none;">
+                                    Please enter a valid height (positive numbers only)
+                                </div>
+                            </div>
+                        </div>
 
-    function calculateBMI() {
-      const age = +document.getElementById('age').value;
-      const weight = +document.getElementById('weight').value;
-      const height = +document.getElementById('height').value;
-      const gender = document.querySelector('input[name="gender"]:checked').value;
-      if (!age || !weight || !height) return alert('Fill all fields!');
+                        <button type="button" class="btn btn-primary w-100 calculate-btn mb-3" onclick="calculateBMI()">
+                            <i class="bi bi-calculator me-2"></i>Calculate BMI
+                        </button>
+                    </form>
 
-      const bmi = +(currentUnit === 'metric'
-        ? weight / ((height/100)**2)
-        : (weight / (height**2)) * 703
-      ).toFixed(1);
+                    <div class="result card" id="result">
+                        <div class="card-body text-center">
+                            <div class="bmi-value mb-2" id="bmi-value">0</div>
+                            <div class="bmi-category mb-3" id="bmi-category">Normal</div>
+                            <div class="text-muted mb-3" id="bmi-range">BMI Range: 18.5 - 24.9</div>
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                BMI (Body Mass Index) is a measure of body fat based on height and weight. 
+                                It's a useful screening tool but doesn't directly measure body fat.
+                            </div>
+                            <button type="button" class="btn btn-success w-100" id="show-me-btn" onclick="showHealthAdvice()" style="display: none;">
+                                <i class="bi bi-heart-pulse me-2"></i>Show Me Health Tips & Precautions
+                            </button>
+                        </div>
+                    </div>
 
-      let category, adviceClass, adviceArr = [], rangeText;
-      if (bmi < 18.5) {
-        category = 'Underweight'; adviceClass = 'advice-underweight';
-        adviceArr = [
-          gender === 'male' ? '👨 He should eat more nutritious meals.' : '👩 She should eat more nutritious meals.',
-          '🥑 Include healthy fats, proteins, and carbs.',
-          '🏋️‍♂️ Strength training to build muscle.'
-        ];
-        rangeText = 'BMI Range: < 18.5';
-      } else if (bmi < 25) {
-        category = 'Normal'; adviceClass = 'advice-normal';
-        adviceArr = [
-          gender === 'male' ? '👨 He is doing great!' : '👩 She is doing great!',
-          '🥗 Maintain balanced nutrition and activity.',
-          '💧 Stay hydrated and manage stress.'
-        ];
-        rangeText = 'BMI Range: 18.5 – 24.9';
-      } else if (bmi < 30) {
-        category = 'Overweight'; adviceClass = 'advice-overweight';
-        adviceArr = [
-          gender === 'male' ? '👨 He should reduce processed foods.' : '👩 She should reduce processed foods.',
-          '🏃‍♀️ Increase aerobic activity.',
-          '🩺 Consult a doctor for guidance.'
-        ];
-        rangeText = 'BMI Range: 25 – 29.9';
-      } else {
-        category = 'Obese'; adviceClass = 'advice-obese';
-        adviceArr = [
-          gender === 'male' ? '👨 He should seek medical advice.' : '👩 She should seek medical advice.',
-          '📋 Adopt a structured weight loss plan.',
-          '🚶‍♂️ Slowly increase physical activity.'
-        ];
-        rangeText = 'BMI Range: ≥ 30';
-      }
+                    <div class="health-advice card" id="health-advice">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0" id="advice-title">
+                                    <i class="bi bi-heart-pulse me-2"></i>Your Health Analysis & Precautions
+                                </h5>
+                                <button type="button" class="btn btn-outline-secondary close-btn" onclick="hideHealthAdvice()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div id="advice-content">
+                                <ul class="list-unstyled mb-0" id="advice-list">
+                                    <li class="mb-2">Maintain a balanced diet with proper nutrition</li>
+                                    <li class="mb-2">Stay physically active with regular exercise</li>
+                                    <li class="mb-2">Get adequate sleep and rest</li>
+                                    <li class="mb-2">Stay hydrated throughout the day</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-      document.getElementById('bmi-value').textContent = bmi;
-      const catEl = document.getElementById('bmi-category');
-      catEl.textContent = category;
-      catEl.className = `bmi-category category-${category.toLowerCase()}`;
-      document.getElementById('bmi-range').textContent = rangeText;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-      document.getElementById('result').classList.add('show');
-      document.getElementById('show-me-btn').style.display = 'inline-block';
+    <script>
+        let currentUnit = 'metric';
+        
+        function getBMICount() {
+            return parseInt(localStorage.getItem('bmiCount')) || 0;
+        }
+        
+        function incrementBMICount() {
+            const currentCount = getBMICount();
+            const newCount = currentCount + 1;
+            localStorage.setItem('bmiCount', newCount.toString());
+            updateBMICountDisplay();
+        }
+        
+        function updateBMICountDisplay() {
+            const count = getBMICount();
+            document.getElementById('bmi-count').textContent = count.toLocaleString();
+        }
+        
+        function getLastChecked() {
+            return localStorage.getItem('lastChecked') || null;
+        }
+        
+        function setLastChecked() {
+            const now = new Date();
+            localStorage.setItem('lastChecked', now.toISOString());
+            updateLastCheckedDisplay();
+        }
+        
+        function updateLastCheckedDisplay() {
+            const lastChecked = getLastChecked();
+            const lastCheckedElement = document.getElementById('last-checked');
+            
+            if (lastChecked) {
+                const date = new Date(lastChecked);
+                const now = new Date();
+                const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+                
+                if (diffInMinutes < 1) {
+                    lastCheckedElement.textContent = 'Just now';
+                } else if (diffInMinutes < 60) {
+                    lastCheckedElement.textContent = `${diffInMinutes} minutes ago`;
+                } else if (diffInMinutes < 1440) {
+                    const hours = Math.floor(diffInMinutes / 60);
+                    lastCheckedElement.textContent = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+                } else {
+                    const days = Math.floor(diffInMinutes / 1440);
+                    lastCheckedElement.textContent = `${days} day${days > 1 ? 's' : ''} ago`;
+                }
+            } else {
+                lastCheckedElement.textContent = 'Never';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBMICountDisplay();
+            updateLastCheckedDisplay();
+        });
 
-      const listEl = document.getElementById('advice-list');
-      listEl.innerHTML = '';
-      adviceArr.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'section-title';
-        li.textContent = item;
-        listEl.appendChild(li);
-      });
+        function setUnit(unit) {
+            currentUnit = unit;
+            
+            document.querySelectorAll('.unit-toggle .btn').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
+            event.target.classList.remove('btn-outline-primary');
+            event.target.classList.add('active', 'btn-primary');
+            
+            const weightInput = document.getElementById('weight');
+            const heightInput = document.getElementById('height');
+            
+            if (unit === 'metric') {
+                weightInput.placeholder = 'Enter weight (kg)';
+                heightInput.placeholder = 'Enter height (cm)';
+            } else if (unit === 'mixed') {
+                weightInput.placeholder = 'Enter weight (kg)';
+                heightInput.placeholder = 'Enter height (in)';
+            }
+            
+            hideResult();
+            hideErrors();
+            
+            document.getElementById('age-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Only positive integers allowed for age (no letters, symbols, or decimals)';
+            document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Only positive numbers allowed for weight (no letters or symbols)';
+            document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Only positive numbers allowed for height (no letters or symbols)';
+        }
 
-      const box = document.getElementById('health-advice');
-      box.className = `health-advice card mt-3 ${adviceClass}`;
-      box.classList.remove('show');
+        function calculateBMI() {
+            const ageInput = document.getElementById('age').value.trim();
+            const weightInput = document.getElementById('weight').value.trim();
+            const heightInput = document.getElementById('height').value.trim();
+            const genderInput = document.querySelector('input[name="gender"]:checked');
+            
+            hideErrors();
+            
+            if (!genderInput) {
+                showError('gender-error');
+                return;
+            }
+            
+            const gender = genderInput.value;
+            
+            if (!ageInput) {
+                showError('age-error');
+                document.getElementById('age-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please enter your age';
+                return;
+            }
+            
+            if (!/^\d+$/.test(ageInput)) {
+                showError('age-error');
+                document.getElementById('age-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Age must be a positive number only (no letters or symbols)';
+                return;
+            }
+            
+            const age = parseInt(ageInput);
+            if (age < 2) {
+                showError('age-error');
+                document.getElementById('age-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Age must be 2 years or above';
+                return;
+            }
+            
+            if (age > 120) {
+                showError('age-error');
+                document.getElementById('age-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please enter a valid age (maximum 120 years)';
+                return;
+            }
+            
+            if (!weightInput) {
+                showError('weight-error');
+                document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please enter your weight';
+                return;
+            }
+            
+            if (!/^\d*\.?\d+$/.test(weightInput)) {
+                showError('weight-error');
+                document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Weight must be a positive number only (no letters or symbols)';
+                return;
+            }
+            
+            const weight = parseFloat(weightInput);
+            if (weight <= 0) {
+                showError('weight-error');
+                document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Weight must be a positive number';
+                return;
+            }
+            
+            if (!heightInput) {
+                showError('height-error');
+                document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please enter your height';
+                return;
+            }
+            
+            if (!/^\d*\.?\d+$/.test(heightInput)) {
+                showError('height-error');
+                document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height must be a positive number only (no letters or symbols)';
+                return;
+            }
+            
+            const height = parseFloat(heightInput);
+            if (height <= 0) {
+                showError('height-error');
+                document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height must be a positive number';
+                return;
+            }
+            
+            if (currentUnit === 'metric') {
+                if (weight > 500) {
+                    showError('weight-error');
+                    document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Weight seems too high. Please check if you\'re using kg.';
+                    return;
+                }
+                if (height > 300) {
+                    showError('height-error');
+                    document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height seems too high. Please check if you\'re using cm (not meters).';
+                    return;
+                }
+                if (height < 50) {
+                    showError('height-error');
+                    document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height seems too low. Please check if you\'re using cm.';
+                    return;
+                }
+            } else if (currentUnit === 'mixed') {
+                if (weight > 500) {
+                    showError('weight-error');
+                    document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Weight seems too high. Please check if you\'re using kg.';
+                    return;
+                }
+                if (height > 120) {
+                    showError('height-error');
+                    document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height seems too high. Please check if you\'re using inches.';
+                    return;
+                }
+                if (height < 20) {
+                    showError('height-error');
+                    document.getElementById('height-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Height seems too low. Please check if you\'re using inches.';
+                    return;
+                }
+            }
+            
+            let bmi;
+            if (currentUnit === 'metric') {
+                bmi = weight / Math.pow(height / 100, 2);
+            } else if (currentUnit === 'mixed') {
+                bmi = weight / Math.pow(height * 0.0254, 2);
+            }
+            
+            if (bmi > 100) {
+                showError('weight-error');
+                document.getElementById('weight-error').innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>BMI result seems incorrect. Please check your input values and units.';
+                return;
+            }
+            
+            incrementBMICount();
+            setLastChecked();
+            
+            displayResult(bmi, age, gender);
+        }
 
-      bmiCheckCount++;
-      localStorage.setItem('bmiCheckCount', bmiCheckCount);
-      document.getElementById('bmi-count').textContent = `👤 ${bmiCheckCount} people have checked their BMI`;
-    }
+        function displayResult(bmi, age, gender) {
+            const resultDiv = document.getElementById('result');
+            const bmiValue = document.getElementById('bmi-value');
+            const bmiCategory = document.getElementById('bmi-category');
+            const bmiRange = document.getElementById('bmi-range');
+            const healthAdvice = document.getElementById('health-advice');
+            const adviceTitle = document.getElementById('advice-title');
+            const adviceList = document.getElementById('advice-list');
+            
+            bmi = Math.round(bmi * 10) / 10;
+            
+            let category, range, categoryClass, adviceClass, title, adviceItems;
+            
+            let bmiCategoryRanges;
+            if (age < 20) {
+                bmiCategoryRanges = {
+                    underweight: bmi < 18.5,
+                    normal: bmi >= 18.5 && bmi < 25,
+                    overweight: bmi >= 25 && bmi < 30,
+                    obese: bmi >= 30
+                };
+            } else {
+                bmiCategoryRanges = {
+                    underweight: bmi < 18.5,
+                    normal: bmi >= 18.5 && bmi < 25,
+                    overweight: bmi >= 25 && bmi < 30,
+                    obese: bmi >= 30
+                };
+            }
+            
+            if (bmiCategoryRanges.underweight) {
+                category = 'Underweight';
+                range = age < 20 ? 'BMI Range: Below 18.5 (Note: Children/Teens need percentile charts)' : 'BMI Range: Below 18.5';
+                categoryClass = 'category-underweight';
+                adviceClass = 'advice-underweight';
+                title = 'Underweight - Health Concerns';
+                adviceItems = [
+                    `⚠️ **Health Risks:** Low energy, weak immune system, nutrient deficiencies`,
+                    `✅ **Immediate Actions for ${gender === 'male' ? 'him' : 'her'}:**`,
+                    '• Eat 5–6 times a day, even if it\'s small meals',
+                    '• Add ghee or butter in food, but not too much',
+                    '• Eat foods that give strength, not just junk food',
+                    '• Do light exercise to build muscle (not lose weight)',
+                    '• Take doctor advice if not gaining weight after trying',
+                    '',
+                    '🥗 **Good Foods to Eat:**',
+                    '• <span class="food-icon">🍌</span> Bananas, <span class="food-icon">🥭</span> mangoes, <span class="food-icon">🥜</span> dry fruits',
+                    '• <span class="water-icon">🥛</span> Milk, <span class="water-icon">🥛</span> curd, <span class="food-icon">🧀</span> paneer, <span class="food-icon">🧀</span> cheese',
+                    '• <span class="food-icon">🥜</span> Nuts like almonds, peanuts',
+                    '• <span class="food-icon">🥚</span> Eggs, <span class="food-icon">🍗</span> chicken, <span class="food-icon">🫘</span> dal',
+                    '• <span class="food-icon">🫓</span> Chapati with ghee, <span class="food-icon">🍚</span> rice with curd'
+                ];
+            } else if (bmiCategoryRanges.normal) {
+                category = 'Healthy Weight';
+                range = age < 20 ? 'BMI Range: 18.5 - 24.9 (Note: Children/Teens need percentile charts)' : 'BMI Range: 18.5 - 24.9';
+                categoryClass = 'category-normal';
+                adviceClass = 'advice-normal';
+                title = 'Keep Maintaining Like This!';
+                adviceItems = [
+                    `✅ ${gender === 'male' ? 'He' : 'She'} is at a healthy weight!`,
+                    '✅ Keep maintaining your current lifestyle',
+                    '✅ Continue with balanced diet and regular exercise',
+                    '✅ Stay physically active and hydrated',
+                    '✅ Regular health check-ups are still important'
+                ];
+            } else if (bmiCategoryRanges.overweight) {
+                category = 'Overweight';
+                range = age < 20 ? 'BMI Range: 25.0 - 29.9 (Note: Children/Teens need percentile charts)' : 'BMI Range: 25.0 - 29.9';
+                categoryClass = 'category-overweight';
+                adviceClass = 'advice-overweight';
+                title = 'Overweight - Health Risks';
+                adviceItems = [
+                    `⚠️ **Health Risks:** Increased risk of diabetes, heart disease, joint problems`,
+                    `✅ **Weight Management Plan for ${gender === 'male' ? 'him' : 'her'}:**`,
+                    '• Eat less oily and junk food (like samosas, chips, sweets)',
+                    '• Go for a walk or do yoga daily for 30 minutes',
+                    '• Don\'t eat too much at once — eat in small amounts',
+                    '• Drink more water — avoid cold drinks and juices with sugar',
+                    '• Eat more home-cooked and light food',
+                    '',
+                    '🥗 **Good Foods to Eat:**',
+                    '• <span class="food-icon">🍎</span> Fruits like apple, <span class="food-icon">🍊</span> orange, <span class="food-icon">🥭</span> papaya',
+                    '• <span class="food-icon">🥬</span> Vegetables like spinach, <span class="food-icon">🫘</span> beans, <span class="food-icon">🥕</span> carrot',
+                    '• <span class="food-icon">🍚</span> Brown rice or <span class="food-icon">🫓</span> roti (not too much)',
+                    '• <span class="water-icon">🥛</span> Curd, <span class="water-icon">🥛</span> buttermilk',
+                    '• <span class="food-icon">🥚</span> Boiled eggs, <span class="food-icon">🐟</span> grilled fish or <span class="food-icon">🍗</span> chicken (less oil)'
+                ];
+            } else {
+                category = 'Obese';
+                range = age < 20 ? 'BMI Range: 30.0+ (Note: Children/Teens need percentile charts)' : 'BMI Range: 30.0 and above';
+                categoryClass = 'category-obese';
+                adviceClass = 'advice-obese';
+                title = 'Obese - Serious Health Risk';
+                adviceItems = [
+                    `🚨 **Serious Health Risks:** High risk of diabetes, heart disease, stroke, sleep apnea`,
+                    `✅ **Immediate Action Required for ${gender === 'male' ? 'him' : 'her'}:**`,
+                    '• Eat less oily and junk food (like samosas, chips, sweets)',
+                    '• Go for a walk or do yoga daily for 30 minutes',
+                    '• Don\'t eat too much at once — eat in small amounts',
+                    '• Drink more water — avoid cold drinks and juices with sugar',
+                    '• Eat more home-cooked and light food',
+                    '',
+                    '🥗 **Good Foods to Eat:**',
+                    '• <span class="food-icon">🍎</span> Fruits like apple, <span class="food-icon">🍊</span> orange, <span class="food-icon">🥭</span> papaya',
+                    '• <span class="food-icon">🥬</span> Vegetables like spinach, <span class="food-icon">🫘</span> beans, <span class="food-icon">🥕</span> carrot',
+                    '• <span class="food-icon">🍚</span> Brown rice or <span class="food-icon">🫓</span> roti (not too much)',
+                    '• <span class="water-icon">🥛</span> Curd, <span class="water-icon">🥛</span> buttermilk',
+                    '• <span class="food-icon">🥚</span> Boiled eggs, <span class="food-icon">🐟</span> grilled fish or <span class="food-icon">🍗</span> chicken (less oil)',
+                    '',
+                    '⚠️ **Important:** Consult a doctor immediately for personalized advice'
+                ];
+            }
+            
+            bmiValue.textContent = bmi;
+            bmiCategory.textContent = category;
+            bmiRange.textContent = range;
+            
+            bmiCategory.className = `bmi-category ${categoryClass}`;
+            
+            adviceTitle.textContent = title;
+            healthAdvice.className = `health-advice ${adviceClass}`;
+            
+            adviceList.innerHTML = '';
+            adviceItems.forEach(item => {
+                const li = document.createElement('li');
+                if (item === '') {
+                    li.innerHTML = '<br>';
+                } else if (item.startsWith('🥗') || item.startsWith('⚠️')) {
+                    li.className = 'section-title';
+                    li.innerHTML = item;
+                } else {
+                    li.innerHTML = item;
+                }
+                adviceList.appendChild(li);
+            });
+            
+            resultDiv.classList.add('show');
+            
+            document.getElementById('show-me-btn').style.display = 'inline-block';
+            
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
-    function showHealthAdvice() {
-      document.getElementById('health-advice').classList.add('show');
-    }
+        function hideResult() {
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('health-advice').classList.remove('show');
+            document.getElementById('show-me-btn').style.display = 'none';
+        }
+        
+        function showHealthAdvice() {
+            const healthAdvice = document.getElementById('health-advice');
+            healthAdvice.classList.add('show');
+            healthAdvice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function hideHealthAdvice() {
+            document.getElementById('health-advice').classList.remove('show');
+        }
 
-    function hideHealthAdvice() {
-      document.getElementById('health-advice').classList.remove('show');
-    }
-  </script>
+        function validateAgeInput(input) {
+            const value = input.value;
+            const ageError = document.getElementById('age-error');
+            
+            if (!value) {
+                ageError.style.display = 'none';
+                return;
+            }
+            
+            if (!/^\d+$/.test(value)) {
+                ageError.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Only positive integers allowed for age (no letters, symbols, or decimals)';
+                ageError.style.display = 'block';
+                return;
+            }
+            
+            const age = parseInt(value);
+            if (age < 2) {
+                ageError.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Age must be 2 years or above';
+                ageError.style.display = 'block';
+            } else if (age > 120) {
+                ageError.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Please enter a valid age (maximum 120 years)';
+                ageError.style.display = 'block';
+            } else {
+                ageError.style.display = 'none';
+            }
+        }
+        
+        function validateNumberInput(input) {
+            const value = input.value;
+            const isWeight = input.id === 'weight';
+            const isHeight = input.id === 'height';
+            const errorId = isWeight ? 'weight-error' : 'height-error';
+            const errorElement = document.getElementById(errorId);
+            
+            if (!value) {
+                errorElement.style.display = 'none';
+                return;
+            }
+            
+            if (!/^-?\d*\.?\d*$/.test(value)) {
+                const fieldName = isWeight ? 'Weight' : 'Height';
+                errorElement.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>Only positive numbers allowed for ${fieldName.toLowerCase()} (no letters or symbols)`;
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (value.includes('.') && value.split('.').length > 2) {
+                const fieldName = isWeight ? 'Weight' : 'Height';
+                errorElement.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>Only positive numbers allowed for ${fieldName.toLowerCase()} (no letters or symbols)`;
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            const numValue = parseFloat(value);
+            if (numValue <= 0) {
+                const fieldName = isWeight ? 'Weight' : 'Height';
+                errorElement.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>${fieldName} must be a positive number (greater than 0)`;
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        }
+
+        function showError(errorId) {
+            document.getElementById(errorId).style.display = 'block';
+        }
+
+        function hideErrors() {
+            document.querySelectorAll('.alert').forEach(error => {
+                error.style.display = 'none';
+            });
+        }
+
+        // Allow Enter key to calculate BMI
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateBMI();
+            }
+        });
+
+        // Real-time validation for all inputs
+        document.getElementById('age').addEventListener('input', function() {
+            validateAgeInput(this);
+        });
+
+        document.getElementById('weight').addEventListener('input', function() {
+            validateNumberInput(this);
+        });
+
+        document.getElementById('height').addEventListener('input', function() {
+            validateNumberInput(this);
+        });
+    </script>
 </body>
 </html>

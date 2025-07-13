@@ -487,16 +487,7 @@
                         <h1 class="fw-bold text-dark mb-3" style="font-size: 1.8rem;">
                             <i class="bi bi-calculator text-primary me-2 pulse-icon"></i>BMI Calculator
                         </h1>
-                        <div class="row justify-content-center g-2">
-                            <div class="col-auto">
-                                <div class="stats-card">
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar me-1"></i>
-                                        Last checked: <span id="last-checked">Never</span>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                     
                     <div class="unit-toggle btn-group w-100 mb-3" role="group">
@@ -646,44 +637,7 @@
             localStorage.setItem('bmiUsageCount', bmiUsageCount.toString());
         }
         
-        function getLastChecked() {
-            return localStorage.getItem('lastChecked') || null;
-        }
-        
-        function setLastChecked() {
-            const now = new Date();
-            localStorage.setItem('lastChecked', now.toISOString());
-            updateLastCheckedDisplay();
-        }
-        
-        function updateLastCheckedDisplay() {
-            const lastChecked = getLastChecked();
-            const lastCheckedElement = document.getElementById('last-checked');
-            
-            if (lastChecked) {
-                const date = new Date(lastChecked);
-                const now = new Date();
-                const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-                
-                if (diffInMinutes < 1) {
-                    lastCheckedElement.textContent = 'Just now';
-                } else if (diffInMinutes < 60) {
-                    lastCheckedElement.textContent = `${diffInMinutes} minutes ago`;
-                } else if (diffInMinutes < 1440) {
-                    const hours = Math.floor(diffInMinutes / 60);
-                    lastCheckedElement.textContent = `${hours} hour${hours > 1 ? 's' : ''} ago`;
-                } else {
-                    const days = Math.floor(diffInMinutes / 1440);
-                    lastCheckedElement.textContent = `${days} day${days > 1 ? 's' : ''} ago`;
-                }
-            } else {
-                lastCheckedElement.textContent = 'Never';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            updateLastCheckedDisplay();
-        });
+
 
         function setUnit(unit) {
             currentUnit = unit;
@@ -840,7 +794,6 @@
             }
             
             incrementBMICount();
-            setLastChecked();
             
             displayResult(bmi, age, gender);
         }
